@@ -1,3 +1,4 @@
+# Jenkins with a Docker-based Python application
 # Jenkins-Multibranch-Pipeline
 Jenkins-Multibranch-Pipeline
 
@@ -6,7 +7,8 @@ git clone https://github.com/atulkamble/Jenkins-Multibranch-Pipeline.git
 cd Jenkins-Multibranch-Pipeline
 ```
 
-To create a multibranch pipeline using Docker in a Python project, you'll typically use a CI/CD tool like Jenkins, GitLab CI, or GitHub Actions. Here’s a general example using Jenkins with a Docker-based Python application.
+To create a multibranch pipeline using Docker in a Python project, you'll typically use a CI/CD tool like Jenkins, GitLab CI, or GitHub Actions. 
+Using Jenkins with a Docker-based Python application.
 
 1. Launch and connect SG on EC2:
 2. Set Security Group for Inbound Traffic
