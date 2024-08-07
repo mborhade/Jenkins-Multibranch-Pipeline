@@ -17,10 +17,39 @@ flask: 5000
 # Prereqiuisites
 Git, Python, Flask, Docker, Jenkins
 ```
+sudo yum update -y
+sudo yum install git -y
+git --version
+git config --global user.name "Atul Kamble"
+git config --global user.email "atul_kamble@hotmail.com"
+git config --list
+sudo yum install python -y
+python --version
 sudo yum install pip -y
 pip --version
 sudo pip install flask -y
 flask --version
+sudo dnf install java-17-amazon-corretto -y
+java --version
+sudo yum install maven -y
+sudo wget -O /etc/yum.repos.d/jenkins.repo     https://pkg.jenkins.io/redhat-stable/jenkins.repo
+sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
+sudo yum install jenkins -y
+sudo yum install docker -y
+sudo docker --version
+sudo docker login
+sudo docker images
+sudo usermod -aG docker jenkins
+sudo systemctl restart jenkins
+// Access and copy Jenkins Password
+public-ip:8080 >> Browser
+// copy password from 
+sudo nano /var/lib/jenkins/secrets/initialAdminPassword
+// Start Docker services
+sudo systemctl status docker
+sudo systemctl start docker
+sudo systemctl enable docker
+sudo systemctl enable jenkins
 ```
 // Update your dockerhub username in deploy.sh
 example: atuljkamble
