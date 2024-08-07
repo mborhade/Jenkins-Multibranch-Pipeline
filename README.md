@@ -52,10 +52,8 @@ sudo systemctl enable jenkins
 git clone https://github.com/atulkamble/Jenkins-Multibranch-Pipeline.git
 cd Jenkins-Multibranch-Pipeline
 ```
-// Update your dockerhub username in deploy.sh
-example: atuljkamble
 
-// Manual & Test/Run Code
+### Manual & Test/Run Code
 ```
 python app.py
 or
@@ -172,6 +170,8 @@ CMD ["python", "app.py"]
 Here’s a basic `deploy.sh` script that you can use for deploying your Dockerized Python application. This script assumes you want to deploy your Docker container to a server or cloud platform and might also include steps to push the Docker image to a container registry.
 
 ### `deploy.sh`
+// Update your dockerhub username in deploy.sh
+example: atuljkamble
 
 ```bash
 #!/bin/bash
