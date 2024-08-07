@@ -8,6 +8,42 @@ cd Jenkins-Multibranch-Pipeline
 
 To create a multibranch pipeline using Docker in a Python project, you'll typically use a CI/CD tool like Jenkins, GitLab CI, or GitHub Actions. Here’s a general example using Jenkins with a Docker-based Python application.
 
+1. Launch and connect SG on EC2:
+2. Set Security Group for Inbound Traffic
+Jenkins: 8080
+flask: 5000
+
+```
+sudo yum install pip -y
+pip --version
+sudo pip install flask -y
+flask --version
+```
+// Update your dockerhub username in deploy.sh
+example: atuljkamble
+
+// Manual & Test/Run Code
+```
+python app.py
+or
+python3 app.py
+```
+
+// Run Script
+```
+sudo sh deploy.sh
+```
+// deployment will be at URL
+```
+https://hub.docker.com/r/atuljkamble/my-python-app
+```
+
+// list docker images
+```
+sudo docker images
+```
+
+
 ### Jenkinsfile Example
 
 This Jenkinsfile demonstrates how to set up a multibranch pipeline with Docker for a Python project:
@@ -138,42 +174,6 @@ docker run -d --name $IMAGE_NAME -p 80:5000 $REGISTRY_URL/$IMAGE_NAME:$IMAGE_TAG
 
 echo "Deployment complete!"
 ```
-
-1. Launch and connect SG on EC2:
-2. Set Security Group for Inbound Traffic
-Jenkins: 8080
-flask: 5000
-
-```
-sudo yum install pip -y
-pip --version
-sudo pip install flask -y
-flask --version
-```
-// Update your dockerhub username in deploy.sh
-example: atuljkamble
-
-// Manual & Test/Run Code
-```
-python app.py
-or
-python3 app.py
-```
-
-// Run Script
-```
-sudo sh deploy.sh
-```
-// deployment will be at URL
-```
-https://hub.docker.com/r/atuljkamble/my-python-app
-```
-
-// list docker images
-```
-sudo docker images
-```
-
 
 ### Explanation:
 
