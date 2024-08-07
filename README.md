@@ -197,4 +197,23 @@ This script provides a basic framework; you might need to adjust it based on you
 - **Docker Integration**: The `docker.image(...).inside` block runs commands inside the Docker container.
 - **Deployment Script**: Make sure to include a `deploy.sh` script or replace it with your deployment commands.
 
+### Delete Docker Image and containers
+// delete all docker images 
+```
+sudo docker image prune -a
+```
+
+// list and delete specific docker image
+```
+sudo docker images
+sudo docker rmi acdc90ce6a0e -f
+```
+
+// list containers
+```
+sudo docker container ls
+sudo docker container stop bf95edad9bb7
+sudo docker container rm bf95edad9bb7
+```
+
 You can adapt this setup to other CI/CD tools by translating the concepts to their respective configurations.
