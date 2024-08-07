@@ -4,10 +4,11 @@
 To create a multibranch pipeline using Docker in a Python project, you'll typically use a CI/CD tool like Jenkins, GitLab CI, or GitHub Actions. 
 Using Jenkins with a Docker-based Python application.
 
-1. Launch and connect SG on EC2:
+1. Launch and connect SG on EC2: 
 2. Set Security Group for Inbound Traffic
 Jenkins: 8080
 flask: 5000
+ssh: 22
 
 # Prereqiuisites
 Git, Python, Flask, Docker, Jenkins
@@ -32,6 +33,7 @@ sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
 sudo yum install jenkins -y
 sudo yum install docker -y
 sudo docker --version
+// Use Dockerhub Credentials
 sudo docker login
 sudo docker images
 sudo usermod -aG docker jenkins
@@ -65,6 +67,7 @@ python3 app.py
 sudo sh deploy.sh
 ```
 // deployment will be at URL
+// Update your Dockerhub url 
 ```
 https://hub.docker.com/r/atuljkamble/my-python-app
 ```
