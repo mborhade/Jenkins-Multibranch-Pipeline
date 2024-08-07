@@ -1,6 +1,5 @@
 # Jenkins with a Docker-based Python application
 # Jenkins-Multibranch-Pipeline
-Jenkins-Multibranch-Pipeline
 
 ```
 git clone https://github.com/atulkamble/Jenkins-Multibranch-Pipeline.git
@@ -15,6 +14,8 @@ Using Jenkins with a Docker-based Python application.
 Jenkins: 8080
 flask: 5000
 
+# Prereqiuisites
+Git, Python, Flask, Docker, Jenkins
 ```
 sudo yum install pip -y
 pip --version
