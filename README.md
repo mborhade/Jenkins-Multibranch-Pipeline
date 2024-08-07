@@ -139,6 +139,42 @@ ssh user@your-deployment-server "docker run -d --name $IMAGE_NAME -p 80:5000 $RE
 echo "Deployment complete!"
 ```
 
+1. Launch and connect SG on EC2:
+2. Set Security Group for Inbound Traffic
+Jenkins: 8080
+flask: 5000
+
+```
+sudo yum install pip -y
+pip --version
+sudo pip install flask -y
+flask --version
+```
+// Update your dockerhub username in deploy.sh
+example: atuljkamble
+
+// Manual & Test/Run Code
+```
+python app.py
+or
+python3 app.py
+```
+
+// Run Script
+```
+sudo sh deploy.sh
+```
+// deployment will be at URL
+```
+https://hub.docker.com/r/atuljkamble/my-python-app
+```
+
+// list docker images
+```
+sudo docker images
+```
+
+
 ### Explanation:
 
 1. **Set Exit on Error**: Ensures the script exits if any command fails.
