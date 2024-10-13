@@ -9,6 +9,7 @@ Using Jenkins with a Docker-based Python application.
 Jenkins: 8080
 flask: 5000
 ssh: 22
+3. update your docker hub account username in deploy.sh
 
 # Prereqiuisites
 Git, Python, Flask, Docker, Jenkins
