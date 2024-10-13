@@ -27,6 +27,6 @@ docker stop $IMAGE_NAME || true && docker rm $IMAGE_NAME || true
 
 # Run the new container
 echo "Running new Docker container..."
-docker run -d --name $IMAGE_NAME -p 80:5000 $REGISTRY_URL/$IMAGE_NAME:$IMAGE_TAG
+docker run -d --name $IMAGE_NAME -p 5000:5000 $REGISTRY_URL/$IMAGE_NAME:$IMAGE_TAG
 
 echo "Deployment complete!"
