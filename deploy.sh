@@ -6,11 +6,11 @@ set -e
 # Variables
 IMAGE_NAME="my-python-app"
 IMAGE_TAG="latest"
-REGISTRY_URL="atuljkamble"  # Replace with your Docker registry URL if needed
+REGISTRY_URL="shravanikhurpe"  # Replace with your Docker registry URL if needed
 
 # Build the Docker image (optional, if not already built)
 echo "Building Docker image..."
-docker build -t $IMAGE_NAME:$IMAGE_TAG .
+sudo docker build -t $IMAGE_NAME:$IMAGE_TAG .
 
 # Tag and push the Docker image to a registry (optional, if using a registry)
 echo "Tagging and pushing Docker image..."
