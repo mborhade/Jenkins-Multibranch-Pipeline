@@ -1,32 +1,28 @@
 #!/bin/bash
 
-# Exit immediately if a command exits with a non-zero status
+# Exit if any command fails
 set -e
 
 # Variables
 IMAGE_NAME="my-python-app"
 IMAGE_TAG="latest"
-REGISTRY_URL="atuljkamble"  # Replace with your Docker registry URL if needed
+REGISTRY_URL="atuljkamble"
 
-# Build the Docker image (optional, if not already built)
+echo "Logging into Docker..."
+echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+
 echo "Building Docker image..."
-sudo docker build -t $IMAGE_NAME:$IMAGE_TAG .
+docker build -t $IMAGE_NAME:$IMAGE_TAG .
 
-# Tag and push the Docker image to a registry (optional, if using a registry)
 echo "Tagging and pushing Docker image..."
 docker tag $IMAGE_NAME:$IMAGE_TAG $REGISTRY_URL/$IMAGE_NAME:$IMAGE_TAG
 docker push $REGISTRY_URL/$IMAGE_NAME:$IMAGE_TAG
 
-# Pull the Docker image on the deployment server
-echo "Pulling Docker image on the deployment server..."
-docker pull $REGISTRY_URL/$IMAGE_NAME:$IMAGE_TAG
+echo "Stopping and removing existing container..."
+docker stop $IMAGE_NAME || true
+docker rm $IMAGE_NAME || true
 
-# Stop and remove existing container if it exists
-echo "Stopping and removing existing container if any..."
-docker stop $IMAGE_NAME || true && docker rm $IMAGE_NAME || true
-
-# Run the new container
-echo "Running new Docker container..."
-docker run -d --name $IMAGE_NAME -p 5000:5000 $REGISTRY_URL/$IMAGE_NAME:$IMAGE_TAG
+echo "Running new container..."
+docker run -d --name $IMAGE_NAME -p 5000:5000 --restart always $REGISTRY_URL/$IMAGE_NAME:$IMAGE_TAG
 
 echo "Deployment complete!"
