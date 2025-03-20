@@ -20,15 +20,15 @@ pipeline {
             }
         }
 
-stage('Test') {
-    steps {
-        script {
-            sh "pip install pytest" // Ensure pytest is installed
-            sh "python -m pytest --junitxml=results.xml" // Run pytest and generate a JUnit report
+        stage('Test') {
+            steps {
+                script {
+                    sh "pip install pytest" // Ensure pytest is installed
+                    sh "mkdir -p test-results" // Ensure the results directory exists
+                    sh "python -m pytest tests --junitxml=test-results/results.xml --disable-warnings" // Run tests with proper output
+                }
+            }
         }
-    }
-}
-
 
         stage('Deploy') {
             when {
@@ -37,7 +37,7 @@ stage('Test') {
             steps {
                 script {
                     docker.image('my-python-app').inside {
-                        sh './deploy.sh'
+                        sh 'chmod +x deploy.sh && ./deploy.sh' // Ensure deploy script is executable
                     }
                 }
             }
@@ -46,8 +46,8 @@ stage('Test') {
 
     post {
         always {
-            archiveArtifacts artifacts: '**/test-results/*.xml', allowEmptyArchive: true
-            junit '**/test-results/*.xml'
+            archiveArtifacts artifacts: 'test-results/results.xml', allowEmptyArchive: true
+            junit 'test-results/results.xml'
         }
     }
 }
