@@ -20,15 +20,15 @@ pipeline {
             }
         }
 
-        stage('Test') {
-            steps {
-                script {
-                    docker.image('my-python-app').inside {
-                        sh 'pytest'
-                    }
-                }
-            }
+stage('Test') {
+    steps {
+        script {
+            sh "pip install pytest" // Ensure pytest is installed
+            sh "python -m pytest --junitxml=results.xml" // Run pytest and generate a JUnit report
         }
+    }
+}
+
 
         stage('Deploy') {
             when {
