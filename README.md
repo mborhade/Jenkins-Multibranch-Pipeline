@@ -222,7 +222,3 @@ sudo docker container rm <container-id>
 
 **Atul Kamble**
 GitHub: [@atulkamble](https://github.com/atulkamble)
-
----
-
-```
