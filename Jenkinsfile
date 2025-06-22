@@ -29,7 +29,7 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'atuljkamble', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                withCredentials([usernamePassword(credentialsId: 'ea0d4c2e-34c6-4806-ad40-486f3d60eeb3', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
                     script {
                         // Check image exists
                         sh 'docker inspect -f . my-python-app'
