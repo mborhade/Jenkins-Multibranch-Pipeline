@@ -1,261 +1,228 @@
-# Jenkins with a Docker-based Python application
-# Jenkins-Multibranch-Pipeline
+# 🚀 Jenkins with a Docker-based Python Application  
+## 📦 Jenkins-Multibranch-Pipeline
 
-To create a multibranch pipeline using Docker in a Python project, you'll typically use a CI/CD tool like Jenkins, GitLab CI, or GitHub Actions. 
-Using Jenkins with a Docker-based Python application.
+A complete Jenkins Multibranch Pipeline setup to build, test, and deploy a Dockerized Python Flask application via DockerHub on an EC2 instance.
 
-1. Launch and connect SG on EC2: 
-2. Set Security Group for Inbound Traffic
-Jenkins: 8080
-flask: 5000
-ssh: 22
-3. update your docker hub account username in deploy.sh
+---
 
-# Prereqiuisites
-Git, Python, Flask, Docker, Jenkins
-```
+## 📚 Prerequisites  
+
+- Git  
+- Python & pip  
+- Flask  
+- Docker  
+- Jenkins  
+
+---
+
+## 🖥️ EC2 & Security Group Configuration  
+
+1. **Launch EC2 Instance**
+2. **Configure Security Group** for Inbound Traffic:
+   - **Jenkins**: TCP 8080
+   - **Flask**: TCP 5000
+   - **SSH**: TCP 22
+
+3. **Update DockerHub username** in `deploy.sh`
+
+---
+
+## ⚙️ Environment Setup (EC2)
+
+```bash
 sudo yum update -y
 sudo yum install git -y
 git --version
 git config --global user.name "Atul Kamble"
 git config --global user.email "atul_kamble@hotmail.com"
 git config --list
+
 sudo yum install python -y
 python --version
+
 sudo yum install pip -y
 pip --version
 sudo pip install flask -y
 flask --version
+
 sudo dnf install java-17-amazon-corretto -y
 java --version
+
 sudo yum install maven -y
-sudo wget -O /etc/yum.repos.d/jenkins.repo     https://pkg.jenkins.io/redhat-stable/jenkins.repo
+
+# Jenkins repo & installation
+sudo wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
 sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
 sudo yum install jenkins -y
+
+# Docker install & permissions
 sudo yum install docker -y
 sudo docker --version
-// Use Dockerhub Credentials
 sudo docker login
-sudo docker images
 sudo usermod -aG docker jenkins
-sudo systemctl restart jenkins
-// Access and copy Jenkins Password
-public-ip:8080 >> Browser
-// copy password from 
-sudo nano /var/lib/jenkins/secrets/initialAdminPassword
-// Start Docker services
-sudo systemctl status docker
+
+# Start services
 sudo systemctl start docker
 sudo systemctl enable docker
+sudo systemctl start jenkins
 sudo systemctl enable jenkins
+
+# Get Jenkins admin password
+sudo cat /var/lib/jenkins/secrets/initialAdminPassword
+````
+
+Access Jenkins:
+
+```
+http://<public-ip>:8080
 ```
 
-### Clone Repository
-```
+---
+
+## 📥 Clone Repository
+
+```bash
 git clone https://github.com/atulkamble/Jenkins-Multibranch-Pipeline.git
 cd Jenkins-Multibranch-Pipeline
 ```
 
-### Manual & Test/Run Code
+---
+
+## 📂 Project Structure
+
+Great — let’s update the **project structure** in your README accordingly with your new `tests/` directory and test file.
+
+Here’s the updated section for your README:
+
+```text
+.
+├── app.py               # Flask application code
+├── deploy.sh            # Docker deployment script
+├── Dockerfile           # Docker build instructions
+├── Jenkinsfile          # Jenkins Pipeline definition
+├── README.md            # Project documentation
+├── requirements.txt     # Python dependencies
+└── tests
+    └── test_app.py      # Unit tests for the application
+
+2 directories, 7 files
 ```
-python app.py
-or
+
+✅ I’ve also added inline comments for clarity.
+
+---
+
+## 📦 Manual Run / Test
+
+```bash
 python3 app.py
 ```
 
-// Run Script
-```
-sudo sh deploy.sh
-```
-// deployment will be at URL
-// Update your Dockerhub url 
-```
-https://hub.docker.com/r/atuljkamble/my-python-app
-```
+---
 
-// list docker images
-```
-sudo docker images
-```
-
-
-### Jenkinsfile Example
-
-This Jenkinsfile demonstrates how to set up a multibranch pipeline with Docker for a Python project:
-
-```groovy
-pipeline {
-    agent any
-
-    stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    sh 'docker build -t my-python-app .'
-                }
-            }
-        }
-
-        stage('Test') {
-            steps {
-                script {
-                    sh '''
-                    docker run --rm -v "$PWD:/app" my-python-app \
-                    pytest --junitxml=/app/test-results/results.xml --disable-warnings || true
-                    '''
-                }
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'ea0d4c2e-34c6-4806-ad40-486f3d60eeb3', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                    script {
-                        // Check image exists
-                        sh 'docker inspect -f . my-python-app'
-
-                        // Run deploy script
-                        sh 'chmod +x deploy.sh && ./deploy.sh'
-                    }
-                }
-            }
-        }
-    }
-
-    post {
-        always {
-            script {
-                if (fileExists('test-results/results.xml')) {
-                    junit 'test-results/results.xml'
-                } else {
-                    echo "No test results found to archive."
-                }
-            }
-
-            archiveArtifacts artifacts: '**/test-results/*.xml', allowEmptyArchive: true
-        }
-    }
-}
-```
-
-### Key Points:
-1. **Environment**: Sets the base Docker image for Python.
-2. **Checkout**: Pulls the latest code from the SCM (e.g., Git).
-3. **Build Docker Image**: Creates a Docker image for your Python application.
-4. **Test**: Runs tests inside the Docker container.
-5. **Deploy**: Deploys the application only if the branch is `main`.
-6. **Post Actions**: Archives test results and generates reports.
-
-### Dockerfile Example
-
-You’ll need a `Dockerfile` for building the Docker image. Here’s a basic example for a Python application:
-
-```dockerfile
-# Use an official Python runtime as a parent image
-FROM python:3.9
-
-# Set the working directory in the container
-WORKDIR /app
-
-# Copy the requirements file into the container
-COPY requirements.txt .
-
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy the rest of the application code into the container
-COPY . .
-
-# Run the application
-CMD ["python", "app.py"]
-```
-
-Here’s a basic `deploy.sh` script that you can use for deploying your Dockerized Python application. This script assumes you want to deploy your Docker container to a server or cloud platform and might also include steps to push the Docker image to a container registry.
-
-### `deploy.sh`
-// Update your dockerhub username in deploy.sh
-example: atuljkamble
+## 🐳 Run Deployment Script
 
 ```bash
-#!/bin/bash
-
-# Exit immediately if a command exits with a non-zero status
-set -e
-
-# Variables
-IMAGE_NAME="my-python-app"
-IMAGE_TAG="latest"
-REGISTRY_URL="atuljkamble"  # Replace with your Docker registry URL if needed
-
-# Build the Docker image (optional, if not already built)
-echo "Building Docker image..."
-docker build -t $IMAGE_NAME:$IMAGE_TAG .
-
-# Tag and push the Docker image to a registry (optional, if using a registry)
-echo "Tagging and pushing Docker image..."
-docker tag $IMAGE_NAME:$IMAGE_TAG $REGISTRY_URL/$IMAGE_NAME:$IMAGE_TAG
-docker push $REGISTRY_URL/$IMAGE_NAME:$IMAGE_TAG
-
-# Pull the Docker image on the deployment server
-echo "Pulling Docker image on the deployment server..."
-docker pull $REGISTRY_URL/$IMAGE_NAME:$IMAGE_TAG
-
-# Stop and remove existing container if it exists
-echo "Stopping and removing existing container if any..."
-docker stop $IMAGE_NAME || true && docker rm $IMAGE_NAME || true
-
-# Run the new container
-echo "Running new Docker container..."
-docker run -d --name $IMAGE_NAME -p 5000:5000 $REGISTRY_URL/$IMAGE_NAME:$IMAGE_TAG
-
-echo "Deployment complete!"
+sudo sh deploy.sh
 ```
 
-### Explanation:
+Deployed container accessible at:
 
-1. **Set Exit on Error**: Ensures the script exits if any command fails.
-2. **Variables**: Define the Docker image name, tag, and registry URL.
-3. **Build Docker Image**: (Optional) Builds the Docker image locally. If you’ve already built the image in the Jenkins pipeline, you can skip this step.
-4. **Tag and Push Docker Image**: (Optional) Tags and pushes the Docker image to a container registry. Replace `your-docker-registry-url` with your actual Docker registry URL.
-5. **Pull Docker Image**: Pulls the Docker image on the deployment server.
-6. **Stop and Remove Existing Container**: Stops and removes any existing container with the same name.
-7. **Run New Container**: Runs the new Docker container on the deployment server, exposing port 80 to port 5000 of the container. Adjust ports as needed.
-
-### Additional Notes:
-
-- **SSH Access**: Ensure you have SSH access to your deployment server and that the `ssh` command is properly configured.
-- **Ports**: Adjust the port mappings as necessary for your application.
-- **Docker Registry**: If you’re using a private Docker registry, ensure proper authentication and access.
-
-This script provides a basic framework; you might need to adjust it based on your specific deployment environment and requirements.
-
-- **Jenkins Multibranch Pipeline**: This setup allows Jenkins to automatically create a pipeline for each branch in your repository.
-- **Docker Integration**: The `docker.image(...).inside` block runs commands inside the Docker container.
-- **Deployment Script**: Make sure to include a `deploy.sh` script or replace it with your deployment commands.
-
-### Delete Docker Image and containers
-// delete all docker images 
 ```
+http://<public-ip>:5000
+```
+
+---
+
+## 📋 Key CI/CD Concepts
+
+1. **Base Environment**: Docker image with Python 3.9
+2. **SCM Checkout**: Pulls code from GitHub
+3. **Docker Image Build**: Builds a new Docker image for the application
+4. **Test Stage**: Runs `pytest` inside the Docker container
+5. **Deploy Stage**: Deploys image to server via `deploy.sh`
+6. **Post Actions**: Archives test reports, cleans images
+
+---
+
+## 📝 deploy.sh Overview
+
+1. **Exit on Error**
+2. **Set Variables**
+3. **Build Docker Image** (if needed)
+4. **Tag & Push to DockerHub**
+5. **Stop & Remove Existing Container**
+6. **Run New Container**
+
+**Note:** Update your DockerHub username in `deploy.sh`
+
+Example:
+
+```bash
+REGISTRY_URL="atuljkamble"
+```
+
+---
+
+## 🔧 Docker Maintenance
+
+**Delete all Docker images**
+
+```bash
 sudo docker image prune -a
 ```
 
-// list and delete specific docker image
-```
+**List and delete specific Docker image**
+
+```bash
 sudo docker images
-sudo docker rmi acdc90ce6a0e -f
+sudo docker rmi <image-id> -f
 ```
 
-// list containers
-```
+**List, stop and remove containers**
+
+```bash
 sudo docker container ls
-sudo docker container stop bf95edad9bb7
-sudo docker container rm bf95edad9bb7
+sudo docker container stop <container-id>
+sudo docker container rm <container-id>
 ```
 
-You can adapt this setup to other CI/CD tools by translating the concepts to their respective configurations.
+---
+
+## 📑 Jenkins Multibranch Pipeline Highlights
+
+* Automatically creates a pipeline per branch in your repo
+* Docker integration via `docker` CLI within stages
+* Deploys via external `deploy.sh` script
+* Test results archived and available in Jenkins reports
+
+---
+
+## 📝 Additional Notes
+
+* SSH access required for EC2 deployment
+* Adjust Security Group ports as needed
+* Update DockerHub repo URL in deployment script:
+
+  ```
+  https://hub.docker.com/r/atuljkamble/my-python-app
+  ```
+* Adaptable to other CI/CD tools by mapping concepts to equivalent configurations
+
+---
+
+## 📌 Links
+
+* **GitHub Repository**: [Jenkins-Multibranch-Pipeline](https://github.com/atulkamble/Jenkins-Multibranch-Pipeline)
+* **DockerHub Repository**: [atuljkamble/my-python-app](https://hub.docker.com/r/atuljkamble/my-python-app)
+
+---
+
+## ✳️ Author
+
+**Atul Kamble**
+GitHub: [@atulkamble](https://github.com/atulkamble)
+
+---
+
+```
