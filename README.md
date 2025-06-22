@@ -87,10 +87,6 @@ This Jenkinsfile demonstrates how to set up a multibranch pipeline with Docker f
 pipeline {
     agent any
 
-    environment {
-        DOCKER_IMAGE = 'python:3.9'
-    }
-
     stages {
         stage('Checkout') {
             steps {
@@ -101,7 +97,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build('my-python-app')
+                    sh 'docker build -t my-python-app .'
                 }
             }
         }
@@ -109,21 +105,23 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    docker.image('my-python-app').inside {
-                        sh 'pytest'
-                    }
+                    sh '''
+                    docker run --rm -v "$PWD:/app" my-python-app \
+                    pytest --junitxml=/app/test-results/results.xml --disable-warnings || true
+                    '''
                 }
             }
         }
 
         stage('Deploy') {
-            when {
-                branch 'main'
-            }
             steps {
-                script {
-                    docker.image('my-python-app').inside {
-                        sh './deploy.sh'
+                withCredentials([usernamePassword(credentialsId: 'ea0d4c2e-34c6-4806-ad40-486f3d60eeb3', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                    script {
+                        // Check image exists
+                        sh 'docker inspect -f . my-python-app'
+
+                        // Run deploy script
+                        sh 'chmod +x deploy.sh && ./deploy.sh'
                     }
                 }
             }
@@ -132,8 +130,15 @@ pipeline {
 
     post {
         always {
+            script {
+                if (fileExists('test-results/results.xml')) {
+                    junit 'test-results/results.xml'
+                } else {
+                    echo "No test results found to archive."
+                }
+            }
+
             archiveArtifacts artifacts: '**/test-results/*.xml', allowEmptyArchive: true
-            junit '**/test-results/*.xml'
         }
     }
 }
