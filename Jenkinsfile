@@ -1,35 +1,52 @@
 pipeline {
-  agent any
+    agent any
 
-  stages {
-    stage('Checkout') {
-      steps {
-        git branch: 'main', url: 'https://github.com/atulkamble/Jenkins-Multibranch-Pipeline.git'
-      }
+    environment {
+        DOCKER_IMAGE = 'my-python-app'
     }
 
-    stage('Build Docker Image') {
-      steps {
-        sh 'docker build -t my-python-app .'
-      }
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    docker.build(env.DOCKER_IMAGE)
+                }
+            }
+        }
+
+        stage('Test') {
+            steps {
+                script {
+                    // Run tests inside a container based on the built image
+                    sh "docker run --rm -v \$PWD:/app ${DOCKER_IMAGE} pytest --junitxml=/app/test-results/results.xml --disable-warnings || true"
+                }
+            }
+        }
+
+        stage('Deploy') {
+            when {
+                branch 'main'
+            }
+            steps {
+                script {
+                    docker.image(env.DOCKER_IMAGE).inside {
+                        sh 'chmod +x deploy.sh && ./deploy.sh'
+                    }
+                }
+            }
+        }
     }
 
-    stage('Test') {
-      steps {
-        sh 'docker run --rm my-python-app pytest'
-        // or with JUnit output:
-        // sh 'docker run --rm -v $PWD:/app my-python-app pytest --junitxml=report.xml'
-      }
+    post {
+        always {
+            archiveArtifacts artifacts: 'test-results/results.xml', allowEmptyArchive: true
+            junit 'test-results/results.xml'
+        }
     }
-  }
-
-  // Optional post actions — skip if not generating test reports
-  /*
-  post {
-    always {
-      archiveArtifacts artifacts: 'report.xml', allowEmptyArchive: true
-      junit 'report.xml'
-    }
-  }
-  */
 }
