@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKER_IMAGE = 'my-python-app'
-    }
-
     stages {
         stage('Checkout') {
             steps {
@@ -15,7 +11,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build(env.DOCKER_IMAGE)
+                    sh 'docker build -t my-python-app .'
                 }
             }
         }
@@ -23,21 +19,23 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    // Run tests inside a container based on the built image
-                    sh "docker run --rm -v \$PWD:/app ${DOCKER_IMAGE} pytest --junitxml=/app/test-results/results.xml --disable-warnings || true"
+                    // Run tests inside the container and generate JUnit XML
+                    sh '''
+                    docker run --rm -v "$PWD:/app" my-python-app \
+                    pytest --junitxml=/app/test-results/results.xml --disable-warnings || true
+                    '''
                 }
             }
         }
 
         stage('Deploy') {
-            when {
-                branch 'main'
-            }
             steps {
                 script {
-                    docker.image(env.DOCKER_IMAGE).inside {
-                        sh 'chmod +x deploy.sh && ./deploy.sh'
-                    }
+                    // Check if image exists before deploy
+                    sh 'docker inspect -f . my-python-app'
+
+                    // Run deploy script directly on host
+                    sh 'chmod +x deploy.sh && ./deploy.sh'
                 }
             }
         }
@@ -45,8 +43,16 @@ pipeline {
 
     post {
         always {
-            archiveArtifacts artifacts: 'test-results/results.xml', allowEmptyArchive: true
-            junit 'test-results/results.xml'
+            // Archive test results if exists
+            script {
+                if (fileExists('test-results/results.xml')) {
+                    junit 'test-results/results.xml'
+                } else {
+                    echo "No test results found to archive."
+                }
+            }
+
+            archiveArtifacts artifacts: '**/test-results/*.xml', allowEmptyArchive: true
         }
     }
 }
