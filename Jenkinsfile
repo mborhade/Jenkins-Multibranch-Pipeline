@@ -11,6 +11,10 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
+                    // Remove existing image if it exists to avoid conflicts
+                    sh 'docker rmi -f my-python-app || true'
+
+                    // Build new image
                     sh 'docker build -t my-python-app .'
                 }
             }
@@ -29,9 +33,13 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'ea0d4c2e-34c6-4806-ad40-486f3d60eeb3', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                withCredentials([usernamePassword(
+                    credentialsId: 'ea0d4c2e-34c6-4806-ad40-486f3d60eeb3', 
+                    passwordVariable: 'DOCKER_PASSWORD', 
+                    usernameVariable: 'DOCKER_USERNAME')]) {
+                    
                     script {
-                        // Check image exists
+                        // Check if image exists before deploy
                         sh 'docker inspect -f . my-python-app'
 
                         // Run deploy script
@@ -50,8 +58,12 @@ pipeline {
                 } else {
                     echo "No test results found to archive."
                 }
+
+                // Clean up dangling images to avoid disk space issues
+                sh 'docker image prune -f || true'
             }
 
+            // Archive test result files
             archiveArtifacts artifacts: '**/test-results/*.xml', allowEmptyArchive: true
         }
     }
